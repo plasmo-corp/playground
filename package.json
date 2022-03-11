@@ -19,6 +19,7 @@
     "build:type:emit": "tsc --emitDeclarationOnly",
     "build:type:alias": "tsc-alias",
     "build:compile": "esbuild src/index.ts --bundle --minify --platform=node --outdir=dist",
+    "build:console:compile": "esbuild src/console.ts --bundle --minify --platform=node --outdir=dist",
     "test": "jest",
     "clean": "rimraf dist",
     "prepublishOnly": "run-s clean build test"
