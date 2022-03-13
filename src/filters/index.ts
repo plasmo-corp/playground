@@ -1,17 +1,29 @@
-import type { Repo } from "~common/repo";
+import type { FilterMatchHeuristic } from "~common/filterType";
+import { Repo, REPO_TYPES } from "~common/repo";
+import GitHubFilters from "./github";
 
-export type FilterMatchHeuristic = {
-  name: string;
-  score: number;
-} 
 
-export const matchFilters = (repo: Repo): FilterMatchHeuristic[] => {
-  // TODO: IF THE SOURCE IS GITHUB, THEN GO TRHOUGH GITHUB MATCH FILTERS AND MATCH
-  return [
-    { name: 'Test0', score: 0 },
-    { name: 'Test1', score: 1 },
-    { name: 'Test2', score: 2 },
-    { name: 'Test-1', score: -1 },
-    { name: 'Test-other0', score: 0 }
-  ];
+export const calcHeuristics = (repo: Repo): FilterMatchHeuristic[] => {
+  const source: string = repo.source;
+  let heuristics: FilterMatchHeuristic[] = [];
+
+  switch (source) {
+    case REPO_TYPES.GITHUB_REPO:
+      for (const filterName in GitHubFilters) {
+        if (Object.prototype.hasOwnProperty.call(GitHubFilters, filterName)) {
+          const filter = GitHubFilters[filterName];
+
+          heuristics.push({
+            name: filter.name,
+            score: filter.fn(repo)
+          });
+        }
+      }
+      break;
+  
+    default:
+      break;
+  }
+  
+  return heuristics;
 }

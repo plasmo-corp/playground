@@ -1,8 +1,9 @@
 import type { GitHubRepo } from "~common/repo";
-import { FilterMatchHeuristic, matchFilters } from "~filters";
+import type { FilterMatchHeuristic } from "~common/filterType";
+import { calcHeuristics } from "~filters";
 
 export const genGithubActions = (repo: GitHubRepo): any[] => {
-  const evaluations: FilterMatchHeuristic[] = matchFilters(repo);
+  const evaluations: FilterMatchHeuristic[] = calcHeuristics(repo);
   let actions: any[] = [];
 
   evaluations.forEach(filterHeuristic => {
