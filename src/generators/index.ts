@@ -1,17 +1,19 @@
-import type { GitHubRepo } from "~common/repo";
-import type { FilterMatchHeuristic } from "~common/filterType";
-import { calcHeuristics } from "~filters";
+import { Repo, REPO_TYPES } from "~common/repo";
+import type { WorkflowSteps } from "~common/generatorType";
+import GitHubWorkflowGenerators from './github';
 
-export const genGithubActions = (repo: GitHubRepo): any[] => {
-  const evaluations: FilterMatchHeuristic[] = calcHeuristics(repo);
-  let actions: any[] = [];
+export const generateWorkflowSteps = (repo: Repo, buildToolName: string): WorkflowSteps => {
+  let steps = [];
 
-  evaluations.forEach(filterHeuristic => {
-    if (filterHeuristic.score > 0) {
-      // TODO: generate the actions for this filter/process
-      actions.push({ name: filterHeuristic.name });
-    }
-  });
+  switch (repo.source) {
+    case REPO_TYPES.GITHUB_REPO:
+      const generator = GitHubWorkflowGenerators[buildToolName]
 
-  return actions;
+      steps = generator.fn(repo);
+      break;
+  
+    default:
+      break;
+  }
+  return steps;
 }

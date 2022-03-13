@@ -14,4 +14,4 @@ export type RepoFilter = {
 export type FilterMatchHeuristic = {
   name: string;
   score: number;
-} 
+}

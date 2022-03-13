@@ -1,7 +1,7 @@
 import { expect, test } from "@jest/globals"
 import { REPO_TYPES } from "~common/repo"
 
-import { validateRepo, genActions } from "./candidate"
+import { validateRepo, genWorkflows } from "./candidate"
 
 test("validateRepo is not yet ready", async () => {
   expect(validateRepo('test', REPO_TYPES.GITHUB_REPO)).toBe(false)
