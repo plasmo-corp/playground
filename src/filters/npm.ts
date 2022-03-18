@@ -1,10 +1,10 @@
-import type { RepoFilter } from "~common/filterType";
+import type { RepoFilter } from "./index";
 import type { Repo } from "~common/repo";
 
 const Filter: RepoFilter = {
   name: 'npm',
   fn: (repo: Repo) => {
-    return 1
+    return ['package.json']
   }
 }
 

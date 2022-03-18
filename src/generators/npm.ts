@@ -1,4 +1,4 @@
-import type { StepsGenerator } from "~common/generatorType";
+import type { StepsGenerator } from "./index";
 import type { Repo } from "~common/repo";
 
 

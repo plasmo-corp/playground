@@ -1,19 +1,25 @@
-import { Repo, REPO_TYPES } from "~common/repo";
-import type { WorkflowSteps } from "~common/generatorType";
-import GitHubWorkflowGenerators from './github';
+import type { Repo } from "~common/repo";
+import NPMGenerator from "./npm"
+
+const generators: { [key: string]: StepsGenerator } = {
+  npm: NPMGenerator
+}
+
+const defaultGenerator = (repo: Repo): WorkflowSteps => {
+  return []
+}
+
+type StepsGeneratorFn = typeof defaultGenerator
+
+export type StepsGenerator = {
+  name: string;
+  fn: StepsGeneratorFn;
+}
+
+export type WorkflowSteps = object[]
 
 export const generateWorkflowSteps = (repo: Repo, buildToolName: string): WorkflowSteps => {
-  let steps = [];
+  const generator = generators[buildToolName];
 
-  switch (repo.source) {
-    case REPO_TYPES.GITHUB_REPO:
-      const generator = GitHubWorkflowGenerators[buildToolName]
-
-      steps = generator.fn(repo);
-      break;
-  
-    default:
-      break;
-  }
-  return steps;
+  return generator.fn(repo);
 }

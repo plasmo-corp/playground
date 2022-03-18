@@ -1,29 +1,39 @@
-import type { FilterMatchHeuristic } from "~common/filterType";
-import { Repo, REPO_TYPES } from "~common/repo";
-import GitHubFilters from "./github";
+import type { Repo } from "~common/repo";
+import NpmFilter from "./npm";
 
+const filters: { [key: string]: RepoFilter } = {
+  npm: NpmFilter,
+}
+
+const defaultFilter = (repo: Repo) => {
+  return []
+}
+
+type FilterFn = typeof defaultFilter
+
+export type RepoFilter = {
+  name: string;
+  fn: FilterFn;
+}
+
+export type FilterMatchHeuristic = {
+  name: string;
+  dataPoints: any[];
+}
 
 export const calcHeuristics = (repo: Repo): FilterMatchHeuristic[] => {
-  const source: string = repo.source;
   let heuristics: FilterMatchHeuristic[] = [];
 
-  switch (source) {
-    case REPO_TYPES.GITHUB_REPO:
-      for (const filterName in GitHubFilters) {
-        if (Object.prototype.hasOwnProperty.call(GitHubFilters, filterName)) {
-          const filter = GitHubFilters[filterName];
+  for (const filterName in filters) {
+    if (Object.prototype.hasOwnProperty.call(filters, filterName)) {
+      const filter = filters[filterName];
 
-          heuristics.push({
-            name: filter.name,
-            score: filter.fn(repo)
-          });
-        }
-      }
-      break;
-  
-    default:
-      break;
+      heuristics.push({
+        name: filter.name,
+        dataPoints: filter.fn(repo)
+      });
+    }
   }
-  
+
   return heuristics;
 }
