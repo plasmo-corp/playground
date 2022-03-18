@@ -42,5 +42,8 @@
     "ts-jest": "27.1.3",
     "tsc-alias": "1.6.3",
     "typescript": "4.6.2"
+  },
+  "dependencies": {
+    "octokit": "^1.7.1"
   }
 }
