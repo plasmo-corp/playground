@@ -27,17 +27,17 @@ const prepareSearch = (repo: Repo) => {
     if (Object.prototype.hasOwnProperty.call(filters, filterName)) {
       const filter = filters[filterName];
 
-      repo.getSearch().addSearchTerms(filter.searchTerms);
+      repo.search.addSearchTerms(filter.searchTerms);
     }
   }
 }
 
-export const calcHeuristics = (repo: Repo): FilterMatchHeuristic[] => {
+export const calcHeuristics = async (repo: Repo): Promise<FilterMatchHeuristic[]> => {
   // Prepare search related filterings
   prepareSearch(repo);
 
   // Generate Repo analysis based on filters
-  repo.analyze();
+  await repo.analyze();
 
   // Gather heuristics per filter
   let heuristics: FilterMatchHeuristic[] = [];

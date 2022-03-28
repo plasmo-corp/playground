@@ -37,7 +37,21 @@ export class GitHubSearch {
     return results;
   }
 
-  public search() {
+  public async search() {
     // Search github for each of the terms and report any relevant data
+    return Promise.all(this.searchTerms.map(async term => {
+      if (!this.cache[term]) {
+        var q = `${term}+repo:${this.repo.name}`
+        var response = await this.repo.api.rest.search.code({ q });
+
+        this.cache[term] = {
+          query: q,
+          count: response.data.total_count,
+          result: response.data
+        }
+      }
+
+      return this.cache[term];
+    }));
   }
 }

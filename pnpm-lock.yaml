@@ -2,6 +2,8 @@ lockfileVersion: 5.3
 
 specifiers:
   '@jest/globals': 27.5.1
+  '@octokit/plugin-retry': ^3.0.9
+  '@octokit/plugin-throttling': ^3.6.2
   '@plasmo-corp/rps': 1.1.0
   '@trivago/prettier-plugin-sort-imports': 3.2.0
   '@types/node': 17.0.21
@@ -15,6 +17,8 @@ specifiers:
   typescript: 4.6.2
 
 dependencies:
+  '@octokit/plugin-retry': 3.0.9
+  '@octokit/plugin-throttling': 3.6.2
   octokit: 1.7.1
 
 devDependencies:
@@ -852,6 +856,15 @@ packages:
 
   /@octokit/plugin-retry/3.0.9:
     resolution: {integrity: sha512-r+fArdP5+TG6l1Rv/C9hVoty6tldw6cE2pRHNGmFPdyfrc696R6JjrQ3d7HdVqGwuzfyrcaLAKD7K8TX8aehUQ==}
+    dependencies:
+      '@octokit/types': 6.34.0
+      bottleneck: 2.19.5
+    dev: false
+
+  /@octokit/plugin-throttling/3.6.2:
+    resolution: {integrity: sha512-0az5fxgVlhFfFtiKLKVXTpmCG2tK3BG0fYI8SO4pmGlN1kyJktJVQA+6KKaFxtxMIWsuHmSEAkR6zSgtk86g2A==}
+    peerDependencies:
+      '@octokit/core': ^3.5.0
     dependencies:
       '@octokit/types': 6.34.0
       bottleneck: 2.19.5

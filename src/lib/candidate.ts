@@ -14,8 +14,8 @@ export const validateRepo = (name: string): boolean => {
   return false;
 }
 
-export const genWorkflows = (repo: Repo): WorkflowFile[] => {
-  let toolNames = findBuildTools(repo);
+export const genWorkflows = async (repo: Repo): Promise<WorkflowFile[]> => {
+  let toolNames = await findBuildTools(repo);
   let workflows = [];
 
   toolNames.forEach(toolName => {
@@ -39,10 +39,10 @@ export const genWorkflows = (repo: Repo): WorkflowFile[] => {
 }
 
 
-const findBuildTools = (repo: Repo): string[] => {
+const findBuildTools = async (repo: Repo): Promise<string[]> => {
   let tools = [];
 
-  const evaluations: FilterMatchHeuristic[] = calcHeuristics(repo);
+  const evaluations: FilterMatchHeuristic[] = await calcHeuristics(repo);
 
   evaluations.forEach(heurictic => {
     if (heurictic.dataPoints.length > 0) {
