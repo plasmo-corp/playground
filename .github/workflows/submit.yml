@@ -10,4 +10,11 @@ jobs:
         platform:
           - chrome
           - firefox
-    steps: []
+    steps:
+      - uses: actions/checkout@v2
+      - run: yarn install
+      - run: yarn build
+      - name: Browser Plugin Publish
+      - uses: plasmo-corp/bpp@v1
+      - with:
+          keys: ${{ secrets.SUBMIT_KEYS }}
