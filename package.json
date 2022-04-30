@@ -2,9 +2,9 @@
   "name": "@plasmo-corp/qtt",
   "version": "1.5.2",
   "description": "",
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
-  "bin": "./dist/index.js",
+  "main": "./dist/console.js",
+  "types": "./dist/console.d.ts",
+  "bin": "./dist/console.js",
   "files": [
     "dist"
   ],
@@ -12,13 +12,13 @@
     "dev": "run-p dev:*",
     "dev:type:emit": "tsc -w --emitDeclarationOnly",
     "dev:type:alias": "tsc-alias -w",
-    "dev:compile": "esbuild src/index.ts --bundle --watch --sourcemap --platform=node --outdir=dist",
+    "dev:compile": "esbuild src/console.ts --bundle --watch --sourcemap --platform=node --outdir=dist",
     "dev:test": "jest --watch",
     "build": "run-p build:type build:compile",
     "build:type": "run-s build:type:*",
     "build:type:emit": "tsc --emitDeclarationOnly",
     "build:type:alias": "tsc-alias",
-    "build:compile": "esbuild src/index.ts --bundle --minify --platform=node --outdir=dist",
+    "build:compile": "esbuild src/console.ts --bundle --minify --platform=node --outdir=dist",
     "test": "jest",
     "clean": "rimraf dist",
     "prepublishOnly": "run-s clean build test"
@@ -42,5 +42,11 @@
     "ts-jest": "27.1.3",
     "tsc-alias": "1.6.3",
     "typescript": "4.6.2"
+  },
+  "dependencies": {
+    "@octokit/plugin-retry": "^3.0.9",
+    "@octokit/plugin-throttling": "^3.6.2",
+    "js-yaml": "^4.1.0",
+    "octokit": "^1.7.1"
   }
 }
