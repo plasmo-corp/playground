@@ -1,8 +1,10 @@
 #!/usr/bin/env node
+import type { Octokit } from "octokit";
 import { baseGitHubWorkflow } from "~common/github-base-workflow";
-import type { Repo } from "~common/repo";
+import { Repo } from "~common/repo";
 import { FilterMatchHeuristic, calcHeuristics } from "~filters";
 import { generateWorkflowSteps } from "~generators";
+import yaml from 'js-yaml';
 
 export type WorkflowFile = {
   name: string,
@@ -15,41 +17,90 @@ export const validateRepo = (name: string): boolean => {
 }
 
 export const genWorkflows = async (repo: Repo): Promise<WorkflowFile[]> => {
-  let toolNames = await findBuildTools(repo);
-  let workflows = [];
+  const toolNames = await findBuildTools(repo);
 
-  toolNames.forEach(toolName => {
+  return toolNames.map(toolName => {
     const workflow = {
       ...baseGitHubWorkflow,
       jobs: {
         ...baseGitHubWorkflow.jobs,
         build: {
           ...baseGitHubWorkflow.jobs.build,
-          steps: baseGitHubWorkflow.jobs.build.steps.concat(
-            generateWorkflowSteps(repo, toolName)
-          )
+          steps: [
+            ...baseGitHubWorkflow.jobs.build.steps,
+            ...generateWorkflowSteps(repo, toolName)
+          ]
         }
       }
     }
 
-    workflows.push({ name: `${toolName}-deploy`, workflow })
+    return { name: `${toolName}-deploy`, workflow };
   });
-
-  return workflows;
 }
 
 
 const findBuildTools = async (repo: Repo): Promise<string[]> => {
-  let tools = [];
-
   const evaluations: FilterMatchHeuristic[] = await calcHeuristics(repo);
 
-  evaluations.forEach(heurictic => {
-    if (heurictic.dataPoints.length > 0) {
-      // TODO: better filtering
-      tools.push(heurictic.name);
-    }
-  });
+  return evaluations.filter(heurictic => heurictic.dataPoints.length > 0).map(heurictic => heurictic.name);
+} 
 
-  return tools;
+const forkRepo = async (name: string, octokit: Octokit): Promise<Repo> => {
+  const [owner, repoName] = name.trim().split("/");
+
+  const fork = await octokit.rest.repos.createFork({ owner, repo: repoName });
+  const defaultBranch = fork.data.default_branch;
+
+  const repo = new Repo(fork.data.full_name, defaultBranch, octokit);
+  repo.setOriginalOwner(owner);
+  await repo.prepare();
+
+  return repo;
+}
+
+export const processRepos = async (repos: string[], octokit: Octokit) => {
+  var repoPrs = {};
+
+  await Promise.all(repos.map(async sourceRepoName => {
+    repoPrs[sourceRepoName] = [];
+
+    const repo = await forkRepo(sourceRepoName, octokit);
+  
+    const workflowFiles = await genWorkflows(repo);
+  
+    console.debug("Validating: ", sourceRepoName, " result: ", validateRepo(sourceRepoName));
+
+    console.debug("Generating Workflows: ", sourceRepoName, " results: ");
+    console.debug(workflowFiles);
+    console.debug("Yaml: ")
+
+    await Promise.all(workflowFiles.map(async file => {
+      console.debug("File: ", file.name)
+      console.debug(yaml.dump(file.workflow))
+
+      const branchName = `plasmo/${file.name}`;
+      const branchSha = await repo.gitStorage.createBranch(branchName);
+      console.debug("Created branch sha: ", branchSha);
+
+      const commitSha = await repo.gitStorage.addFileToBranch(
+        ".github/workflows/submit.yml", yaml.dump(file.workflow), branchSha
+      );
+
+      const updatedBranch = await repo.gitStorage.updateBranch(branchName, commitSha);
+
+      console.debug("Updated branch: ", updatedBranch);
+
+      const submitPrLink = `[Submit Pull Request to Root](https://github.com/${repo.originalOwner}/${repo.name}/compare/${repo.mainBranch}...${repo.owner}:${branchName})`
+      const pr = await repo.pulls.createPR(
+        `Generated Workflow for ${file.name}`,
+        branchName,
+        "Once you have validated that this pr is valid, you may click the link below to proceed to creating a pull request against the main repo. \n"
+        + submitPrLink
+      );
+
+      repoPrs[sourceRepoName] = repoPrs[sourceRepoName].concat(pr);
+    }));
+  }));
+
+  return repoPrs;
 }
