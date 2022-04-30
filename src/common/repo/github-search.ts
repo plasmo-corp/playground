@@ -26,22 +26,16 @@ export class GitHubSearch {
   }
 
   public getResultsFor(terms: string[]) : SearchData[] {
-    var results: SearchData[] = [];
-
-    terms.forEach(term => {
-      if (this.cache[term]) {
-        results.push({ ...SearchDataObj, ...this.cache[term]})
-      }
-    });
-
-    return results;
+    return terms.filter(term => this.cache[term]).map(term => 
+      ({ ...SearchDataObj, ...this.cache[term] })
+    );
   }
 
   public async search() {
     // Search github for each of the terms and report any relevant data
     return Promise.all(this.searchTerms.map(async term => {
       if (!this.cache[term]) {
-        var q = `${term}+repo:${this.repo.name}`
+        var q = `${term}+repo:${this.repo.path}`
         var response = await this.repo.api.rest.search.code({ q });
 
         this.cache[term] = {
